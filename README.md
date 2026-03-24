@@ -1,26 +1,33 @@
-<div align="center">
-  <h1>🇮🇳 India AI Agent Toolkit</h1>
-  <p><b>Collection of AI agents for Indian businesses — Hinglish sales, GST helper, WhatsApp automation agents</b></p>
-  
-  <p>
-    <a href="https://github.com/keviv777/india-ai-agent-toolkit/stargazers"><img src="https://img.shields.io/github/stars/keviv777/india-ai-agent-toolkit?style=for-the-badge&color=FFE333&logo=github" alt="Stars" /></a>
-    <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License" />
-    <img src="https://img.shields.io/badge/Made%20in-India-FF9933?style=for-the-badge" alt="Made in India" />
-  </p>
-</div>
+# 🇮🇳 India AI Agent Toolkit
 
----
-
-## 🚀 About This Toolkit
-This repository contains a curated collection of **AI Agent system prompts and configurations** designed specifically for **Indian SMBs and startups**. These agents understand the nuances of the Indian market, speak in Hinglish, and manage local operational tasks like GST calculations and WhatsApp outreach.
-
-You can use these agent definitions with tools like **n8n**, **Ollama** (Llama 3), **Claude**, or **ChatGPT**.
+> Ready-to-use AI automation agents built specifically for Indian businesses.
+> Free to use. No OpenAI needed. Runs locally.
 
 ## 🤖 Available Agents
 
-1. **[WhatsApp Sales Agent (Hinglish)](agents/whatsapp-sales-agent.md)** - Automates follow-ups and lead qualification natively over WhatsApp.
-2. **[Hindi Content Writer](agents/hindi-content-writer.md)** - Generates high-converting social media content for Indian audiences in Hinglish/Hindi.
-3. **[GST & Invoice Helper](agents/gst-invoice-helper.md)** - Rapidly calculates GST and drafts professional invoices compliant with Indian tax structures.
+| Agent | Description | Status |
+|-------|-------------|--------|
+| [WhatsApp Sales Agent](./agents/whatsapp-sales-agent/) | Auto-send & classify WhatsApp leads using AI | ✅ Ready |
+| [Hindi Content Writer](./agents/hindi-content-writer/) | Generate Hindi marketing content via Ollama | 🚧 Coming Soon |
+| [GST Invoice Helper](./agents/gst-invoice-helper/) | Auto-generate GST invoices via n8n | 🚧 Coming Soon |
 
-## 🤝 Contribution
-Want to add your own agent to the toolkit? We'd love your help in building open AI resources for India! Read our **[Contributing Guide](CONTRIBUTING.md)** to get started.
+## ⚡ Tech Stack
+- n8n — workflow automation
+- Ollama + llama3 — free local AI (no OpenAI cost)
+- Meta WhatsApp Cloud API
+- Google Sheets
+
+## 💰 Cost
+- AI: ₹0 (runs locally)
+- WhatsApp: ₹500-1000/month only
+
+## 🚀 Getting Started
+1. Pick an agent from the table above
+2. Follow its README
+3. Import JSON into n8n
+4. Done!
+
+## 🤝 Contributing
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## ⭐ Star this repo if it helped you!
