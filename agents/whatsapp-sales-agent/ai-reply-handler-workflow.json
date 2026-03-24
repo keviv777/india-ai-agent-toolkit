@@ -1,0 +1,496 @@
+{
+  "name": "Mooshuree — AI Reply Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-reply",
+        "options": {}
+      },
+      "id": "wh-1",
+      "name": "WhatsApp Reply Webhook",
+      "position": [
+        112,
+        304
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "2a804122-03e9-4cf1-8428-89dbb62b45e3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].from }}"
+            },
+            {
+              "id": "a2",
+              "name": "incomingMessage",
+              "type": "string",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].text.body }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-1",
+      "name": "Extract Phone and Message",
+      "position": [
+        320,
+        304
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone",
+              "lookupValue": "={{ $json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gs-1",
+      "name": "Lookup Lead in Google Sheets",
+      "position": [
+        544,
+        304
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama3"
+            },
+            {
+              "name": "prompt",
+              "value": "=Brand: {{ $('Lookup Lead in Google Sheets').item.json['Brand Name'] ?? 'Unknown' }}\nCustomer message: {{ $('Extract Phone and Message').item.json.incomingMessage }}"
+            },
+            {
+              "name": "system",
+              "value": "You are a friendly sales assistant for Mooshuree, a content creation agency that makes UGC videos and product reels for brands. Keep replies short, warm and professional (2-4 lines max for WhatsApp). End EVERY reply with exactly one of these tags on a new line:\n[STATUS: INTERESTED]\n[STATUS: NURTURING]\n[STATUS: NOT INTERESTED]"
+            },
+            {
+              "name": "stream",
+              "value": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-1",
+      "name": "Send to Ollama AI",
+      "position": [
+        768,
+        304
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "aiReply",
+              "type": "string",
+              "value": "={{ $json.response }}"
+            },
+            {
+              "id": "b2",
+              "name": "detectedStatus",
+              "type": "string",
+              "value": "={{ ($json.response.match(/\\[STATUS: (INTERESTED|NURTURING|NOT INTERESTED)\\]/) || ['','NURTURING'])[1] }}"
+            },
+            {
+              "id": "b3",
+              "name": "cleanReply",
+              "type": "string",
+              "value": "={{ $json.response.replace(/\\n?\\[STATUS:[A-Z ]+\\]/g, '').trim() }}"
+            },
+            {
+              "id": "b4",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $('Extract Phone and Message').item.json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-2",
+      "name": "Parse AI Reply and Status",
+      "position": [
+        992,
+        304
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/1089959884182074/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAU1uW8ZBhA0BQ28pMNRxQNX2BhUMN2w0S2keIXn0JjN0XfFgp752tZBaE698WZAN1x5gg7ZCletedwvHmrxsvbZBzhyCRUDC3LZCQIrbjfpZCGdXLh791ZAD2lQvDiuUPy04ZAZCB1RcZAPhB515POyu6WPWy0fAZAfOJlrudeMsw94wonTuLqXoDxT0zGIPV0LBZBmsZBwZDZD"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"\\u007B\\u007B$json.phone\\u007D\\u007D\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"hello_world\",\n    \"language\": {\n      \"code\": \"en_US\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "http-2",
+      "name": "Send AI Reply via Meta WhatsApp",
+      "position": [
+        1200,
+        304
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $('Parse AI Reply and Status').item.json.detectedStatus === 'INTERESTED' ? 0 : $('Parse AI Reply and Status').item.json.detectedStatus === 'NURTURING' ? 1 : 2 }}"
+      },
+      "id": "sw-1",
+      "name": "Route by Status",
+      "position": [
+        1424,
+        304
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [],
+          "value": {
+            "Phone": "={{ $('Parse AI Reply and Status').item.json.phone }}",
+            "Salesperson": "={{ ['Salesperson 1','Salesperson 2','Salesperson 3'][Math.floor($now.toMillis() % 3)] }}",
+            "Status": "Interested Lead"
+          }
+        },
+        "options": {}
+      },
+      "id": "gs-2",
+      "name": "Update Status to Interested",
+      "position": [
+        1648,
+        112
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "All Interested Leads"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [],
+          "value": {
+            "Brand Name": "={{ $('Lookup Lead in Google Sheets').item.json['Brand Name'] }}",
+            "Date Added": "={{ $now.toISO() }}",
+            "Phone": "={{ $('Parse AI Reply and Status').item.json.phone }}",
+            "Salesperson": "={{ $('Update Status to Interested').item.json.Salesperson }}",
+            "Status": "Interested Lead"
+          }
+        },
+        "options": {}
+      },
+      "id": "gs-3",
+      "name": "Append to All Interested Leads",
+      "position": [
+        1872,
+        112
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [],
+          "value": {
+            "Phone": "={{ $('Parse AI Reply and Status').item.json.phone }}",
+            "Status": "Nurturing"
+          }
+        },
+        "options": {}
+      },
+      "id": "gs-4",
+      "name": "Update Status to Nurturing",
+      "position": [
+        1648,
+        304
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "result",
+              "type": "string",
+              "value": "NOT_INTERESTED — no further action taken"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-3",
+      "name": "Not Interested — No Action",
+      "position": [
+        1648,
+        512
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Phone and Message": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Lookup Lead in Google Sheets",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Lookup Lead in Google Sheets": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send to Ollama AI",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Parse AI Reply and Status": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send AI Reply via Meta WhatsApp",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Route by Status": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Update Status to Interested",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Update Status to Nurturing",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Not Interested — No Action",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send AI Reply via Meta WhatsApp": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Route by Status",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send to Ollama AI": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Parse AI Reply and Status",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Update Status to Interested": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Append to All Interested Leads",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WhatsApp Reply Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Extract Phone and Message",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "6218b74b-bf8d-490a-b62b-370a1c30556d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a2996ec9b7dfd4f698d10f87e69f086ff9e2698e7e806f1c08fc06dd97377def"
+  },
+  "id": "rxiU2hOc1zsJVXvf",
+  "tags": []
+}

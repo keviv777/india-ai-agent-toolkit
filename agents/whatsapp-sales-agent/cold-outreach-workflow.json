@@ -1,0 +1,348 @@
+{
+  "name": "Mooshuree — Cold Outreach",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule",
+      "name": "Schedule Trigger",
+      "position": [
+        112,
+        304
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "node-sheets-read",
+      "name": "Read Leads from Google Sheets",
+      "position": [
+        320,
+        304
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const brandName = $json['Brand Name'] || 'there';\nconst phone = String($json['Phone'] || '').replace(/[^0-9]/g, '');\nconst message = 'Hi ' + brandName + '! We are Mooshuree, a content creation agency specializing in UGC videos and product reels. Would you be interested in creating similar content for ' + brandName + '?';\n\n$json.phone = phone;\n$json.message = message;\n$json.brandName = brandName;\n\nreturn $input.item;"
+      },
+      "id": "node-set-message",
+      "name": "Build WhatsApp Message",
+      "position": [
+        544,
+        304
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/1089959884182074/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAU1uW8ZBhA0BQ28pMNRxQNX2BhUMN2w0S2keIXn0JjN0XfFgp752tZBaE698WZAN1x5gg7ZCletedwvHmrxsvbZBzhyCRUDC3LZCQIrbjfpZCGdXLh791ZAD2lQvDiuUPy04ZAZCB1RcZAPhB515POyu6WPWy0fAZAfOJlrudeMsw94wonTuLqXoDxT0zGIPV0LBZBmsZBwZDZD"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{$json.phone}}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"hello_world\",\n    \"language\": {\n      \"code\": \"en_US\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "node-send-text",
+      "name": "Send WhatsApp Text",
+      "position": [
+        768,
+        208
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/1089959884182074/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAU1uW8ZBhA0BQ28pMNRxQNX2BhUMN2w0S2keIXn0JjN0XfFgp752tZBaE698WZAN1x5gg7ZCletedwvHmrxsvbZBzhyCRUDC3LZCQIrbjfpZCGdXLh791ZAD2lQvDiuUPy04ZAZCB1RcZAPhB515POyu6WPWy0fAZAfOJlrudeMsw94wonTuLqXoDxT0zGIPV0LBZBmsZBwZDZD"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_product",
+              "value": "whatsapp"
+            },
+            {
+              "name": "to",
+              "value": "={{ $('Build WhatsApp Message').item.json.phone }}"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "video.link",
+              "value": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            {
+              "name": "video.caption",
+              "value": "Mooshuree Portfolio — Sample Work"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-send-video",
+      "name": "Send Portfolio Demo Video",
+      "position": [
+        992,
+        208
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1pg7XQX6XhdVBge7henTSZVo-ailyvi7GYII_XnsA2iQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Sent",
+            "Message Sent At": "={{$now}}",
+            "Phone": "={{$('Build WhatsApp Message').item.json.phone}}"
+          },
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Brand Name",
+              "displayName": "Brand Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact Name",
+              "displayName": "Contact Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Salesperson",
+              "displayName": "Salesperson",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message Sent At",
+              "displayName": "Message Sent At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "node-update-sheet",
+      "name": "Update Sheet Status",
+      "position": [
+        1200,
+        208
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleApi": {
+          "id": "xWTIkcI6ybQEPBWQ",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "node-manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        160
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Build WhatsApp Message": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send WhatsApp Text",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Read Leads from Google Sheets": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Build WhatsApp Message",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Read Leads from Google Sheets",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send Portfolio Demo Video": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Update Sheet Status",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Text": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Portfolio Demo Video",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Leads from Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "bdfcfb82-d48c-4c5a-ba6e-4ec3c725c0b8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a2996ec9b7dfd4f698d10f87e69f086ff9e2698e7e806f1c08fc06dd97377def"
+  },
+  "id": "8tSeQEhyD3d3aXsf",
+  "tags": []
+}
