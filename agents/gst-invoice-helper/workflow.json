@@ -1,0 +1,136 @@
+{
+  "name": "GST Invoice Helper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gst-invoice-webhook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const baseAmount = item.baseAmount || 0;\nconst gstRate = 18;\nconst cgst = (baseAmount * (gstRate / 2)) / 100;\nconst sgst = (baseAmount * (gstRate / 2)) / 100;\nconst total = baseAmount + cgst + sgst;\n\nreturn {\n  clientName: item.clientName,\n  phone: item.phone,\n  itemDescription: item.itemDescription,\n  baseAmount: baseAmount,\n  cgst: cgst,\n  sgst: sgst,\n  total: total,\n  currency: \"INR\"\n};"
+      },
+      "name": "Calculate GST",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "ENTER_YOUR_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client": "={{ $json.clientName }}",
+            "Item": "={{ $json.itemDescription }}",
+            "Base Amount": "={{ $json.baseAmount }}",
+            "CGST (9%)": "={{ $json.cgst }}",
+            "SGST (9%)": "={{ $json.sgst }}",
+            "Total Amount": "={{ $json.total }}"
+          }
+        },
+        "options": {}
+      },
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v17.0/YOUR_PHONE_NUMBER_ID/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_META_API_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_product",
+              "value": "whatsapp"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={ \"body\": \"Namaste {{ $json.clientName }} 🙏\\n\\nYour invoice for '{{ $json.itemDescription }}' has been generated.\\n\\nBase Amount: ₹{{ $json.baseAmount }}\\nCGST (9%): ₹{{ $json.cgst }}\\nSGST (9%): ₹{{ $json.sgst }}\\n*Total: ₹{{ $json.total }}*\\n\\nPlease complete the payment at the earliest. Thank you!\" }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "WhatsApp (Meta)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Calculate GST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate GST": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}
