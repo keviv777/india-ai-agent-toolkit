@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const baseAmount = item.baseAmount || 0;\nconst gstRate = 18;\nconst cgst = (baseAmount * (gstRate / 2)) / 100;\nconst sgst = (baseAmount * (gstRate / 2)) / 100;\nconst total = baseAmount + cgst + sgst;\n\nreturn {\n  clientName: item.clientName,\n  phone: item.phone,\n  itemDescription: item.itemDescription,\n  baseAmount: baseAmount,\n  cgst: cgst,\n  sgst: sgst,\n  total: total,\n  currency: \"INR\"\n};"
+        "jsCode": "const baseAmount = item.baseAmount || 0;\nconst gstRate = 18;\nconst cgst = (baseAmount * (gstRate / 2)) / 100;\nconst sgst = (baseAmount * (gstRate / 2)) / 100;\nconst total = baseAmount + cgst + sgst;\n\n// Generate Invoice ID and Date\nconst dateObj = new Date();\nconst dateStr = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });\nconst invoiceId = \"INV-\" + dateObj.getTime().toString().slice(-6);\n\nreturn {\n  invoiceId: invoiceId,\n  date: dateStr,\n  clientName: item.clientName,\n  phone: item.phone,\n  itemDescription: item.itemDescription,\n  baseAmount: baseAmount,\n  cgst: cgst,\n  sgst: sgst,\n  total: total,\n  currency: \"INR\"\n};"
       },
       "name": "Calculate GST",
       "type": "n8n-nodes-base.code",
@@ -38,6 +38,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
+            "Invoice ID": "={{ $json.invoiceId }}",
+            "Date": "={{ $json.date }}",
             "Client": "={{ $json.clientName }}",
             "Item": "={{ $json.itemDescription }}",
             "Base Amount": "={{ $json.baseAmount }}",
@@ -84,7 +86,7 @@
             },
             {
               "name": "text",
-              "value": "={ \"body\": \"Namaste {{ $json.clientName }} 🙏\\n\\nYour invoice for '{{ $json.itemDescription }}' has been generated.\\n\\nBase Amount: ₹{{ $json.baseAmount }}\\nCGST (9%): ₹{{ $json.cgst }}\\nSGST (9%): ₹{{ $json.sgst }}\\n*Total: ₹{{ $json.total }}*\\n\\nPlease complete the payment at the earliest. Thank you!\" }"
+              "value": "={ \"body\": \"🧾 *INVOICE DETAILS*\\n━━━━━━━━━━━━━━━\\nNamaste {{ $json.clientName }} 🙏,\\n\\nHere is your invoice for *{{ $json.itemDescription }}*.\\n\\n*Invoice ID:* {{ $json.invoiceId }}\\n*Date:* {{ $json.date }}\\n\\n*Breakdown:*\\n▫️ Base Amount: ₹{{ $json.baseAmount }}\\n▫️ CGST (9%): ₹{{ $json.cgst }}\\n▫️ SGST (9%): ₹{{ $json.sgst }}\\n\\n💰 *Total Payable: ₹{{ $json.total }}*\\n━━━━━━━━━━━━━━━\\n\\nPlease complete the payment at your earliest convenience. Let us know if you have any questions!\" }"
             }
           ]
         },
