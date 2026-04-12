@@ -8,7 +8,7 @@
 | Agent | Description | Status |
 |-------|-------------|--------|
 | [WhatsApp Sales Agent](./agents/whatsapp-sales-agent/) | Auto-send & classify WhatsApp leads using AI | ✅ Ready |
-| [Hindi Content Writer](./agents/hindi-content-writer/) | Generate Hindi marketing content via Ollama | 🚧 Coming Soon |
+| [Hindi Content Writer](./agents/hindi-content-writer/) | Generate Hindi marketing content via Ollama | ✅ Ready |
 | [GST Invoice Helper](./agents/gst-invoice-helper/) | Auto-generate GST invoices via n8n | 🚧 Coming Soon |
 
 ## ⚡ Tech Stack

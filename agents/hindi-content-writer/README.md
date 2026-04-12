@@ -11,5 +11,13 @@ Indian social media requires a distinct tone—often a blend of local phrasing (
 - **Video Scripts:** Engaging intros, hooks, and call-to-actions tailored for Indian creators.
 
 ## Included Files
+- `hindi-content-writer-workflow.json`: A ready-to-import n8n workflow implementing the full automation.
 - `prompts.txt`: Master system prompt to configure your LLM (works great with Ollama Llama 3 or Claude 3.5 Sonnet).
 - `examples.md`: Sample outputs demonstrating the target tone.
+
+## Getting Started
+1. Install [n8n](https://n8n.io/).
+2. In your n8n workspace, create a new workflow.
+3. Import the `hindi-content-writer-workflow.json` file.
+4. Set up an `Ollama API` credential with your local Ollama base URL (e.g. `http://localhost:11434`) and assign it to the Chat model node.
+5. Activate the workflow and test via the configured `/webhook/hindi-content` endpoint.

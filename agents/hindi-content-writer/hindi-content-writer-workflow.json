@@ -1,0 +1,270 @@
+{
+  "updatedAt": "2026-04-12T09:51:44.625Z",
+  "createdAt": "2026-04-12T09:38:10.538Z",
+  "id": "uV9UHJJvvC615BUv",
+  "name": "Hindi Content Writer",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hindi-content",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "position": [
+        -224,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "0ffb0474-4cd9-4345-85fd-16536151413e"
+    },
+    {
+      "parameters": {
+        "prompt": "=You are a Hindi content writer for Indian businesses. Content Type: {{ $json.body.type }} Topic: {{ $json.body.topic }} Tone: {{ $json.body.tone }} Write engaging content in Hindi for Indian audience."
+      },
+      "id": "node-llm",
+      "name": "Basic LLM Chain",
+      "position": [
+        112,
+        0
+      ],
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "llama3:latest",
+        "options": {}
+      },
+      "id": "node-ollama",
+      "name": "Ollama Chat Model",
+      "position": [
+        208,
+        208
+      ],
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "credentials": {
+        "ollamaApi": {
+          "id": "jvgfoVhsZFo5uCUa",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "position": [
+        480,
+        -16
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Respond to Webhook",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "index": 0,
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel"
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Basic LLM Chain",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "fc61c939-89d5-4fe1-a017-279341c7a18b",
+  "activeVersionId": "fc61c939-89d5-4fe1-a017-279341c7a18b",
+  "versionCounter": 13,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-12T09:38:10.539Z",
+      "createdAt": "2026-04-12T09:38:10.539Z",
+      "role": "workflow:owner",
+      "workflowId": "uV9UHJJvvC615BUv",
+      "projectId": "8vBiEu5NYjBOqcpK",
+      "project": {
+        "updatedAt": "2026-01-14T10:26:40.989Z",
+        "createdAt": "2026-01-14T10:18:33.282Z",
+        "id": "8vBiEu5NYjBOqcpK",
+        "name": "Vivek Kumar Prajapati <vivekprajapati97985@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "92c378a3-ba0c-4824-b9c2-f2dcc9122ad5"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-12T11:06:07.000Z",
+    "createdAt": "2026-04-12T09:51:44.626Z",
+    "versionId": "fc61c939-89d5-4fe1-a017-279341c7a18b",
+    "workflowId": "uV9UHJJvvC615BUv",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "hindi-content",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "node-webhook",
+        "name": "Webhook",
+        "position": [
+          -224,
+          0
+        ],
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "webhookId": "0ffb0474-4cd9-4345-85fd-16536151413e"
+      },
+      {
+        "parameters": {
+          "prompt": "=You are a Hindi content writer for Indian businesses. Content Type: {{ $json.body.type }} Topic: {{ $json.body.topic }} Tone: {{ $json.body.tone }} Write engaging content in Hindi for Indian audience."
+        },
+        "id": "node-llm",
+        "name": "Basic LLM Chain",
+        "position": [
+          112,
+          0
+        ],
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "model": "llama3:latest",
+          "options": {}
+        },
+        "id": "node-ollama",
+        "name": "Ollama Chat Model",
+        "position": [
+          208,
+          208
+        ],
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "credentials": {
+          "ollamaApi": {
+            "id": "jvgfoVhsZFo5uCUa",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.text }}",
+          "options": {}
+        },
+        "id": "node-respond",
+        "name": "Respond to Webhook",
+        "position": [
+          480,
+          -16
+        ],
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1
+      }
+    ],
+    "connections": {
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Respond to Webhook",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "index": 0,
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel"
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Basic LLM Chain",
+              "type": "main"
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vivek Kumar Prajapati",
+    "name": "Version fc61c939",
+    "description": "",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-12T11:06:07.927Z",
+        "id": 36,
+        "workflowId": "uV9UHJJvvC615BUv",
+        "versionId": "fc61c939-89d5-4fe1-a017-279341c7a18b",
+        "event": "activated",
+        "userId": "92c378a3-ba0c-4824-b9c2-f2dcc9122ad5"
+      }
+    ]
+  }
+}
