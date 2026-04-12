@@ -21,3 +21,7 @@ Indian social media requires a distinct tone—often a blend of local phrasing (
 3. Import the `hindi-content-writer-workflow.json` file.
 4. Set up an `Ollama API` credential with your local Ollama base URL (e.g. `http://localhost:11434`) and assign it to the Chat model node.
 5. Activate the workflow and test via the configured `/webhook/hindi-content` endpoint.
+
+## 📸 Workflow Screenshot
+![Hindi Content Writer Workflow](workflow-screenshot.png)
+*n8n workflow: Webhook → Basic LLM Chain → Ollama Chat Model → Respond to Webhook*
