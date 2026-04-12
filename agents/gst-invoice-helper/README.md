@@ -11,6 +11,10 @@ This automation listens via Webhook for incoming sales or transaction details, u
 3. **Ollama Chat Model**: A local fallback or primary model mechanism running `llama3:latest` for zero-cost, high-speed AI generation.
 4. **Respond to Webhook Node**: Returns the final AI-generated invoice back to the app, tool, or user who fired the webhook.
 
+## 📸 Workflow Screenshot
+![GST Invoice Helper Workflow](gst-invoice-workflow.png)
+*n8n workflow: Webhook → Basic LLM Chain → Ollama Chat Model → Respond to Webhook*
+
 ## Setup Instructions
 
 ### Prerequisites
